@@ -1,4 +1,5 @@
 const Phone = require('../models/Phone');
+const Booking = require('../models/Booking');
 
 // @desc    Get all phones
 // @route   GET /api/phones
@@ -28,8 +29,37 @@ exports.getPhones = async (req, res) => {
       query = query.sort('-createdAt');
     }
 
-    const phones = await query;
-    res.status(200).json({ success: true, count: phones.length, data: phones });
+    const phones = await query.lean();
+
+    // Fetch active bookings count for all phones
+    const activeCounts = await Booking.aggregate([
+      { $match: { status: { $in: ['Active', 'Completed'] } } },
+      { $group: { _id: '$phone', count: { $sum: 1 } } }
+    ]);
+
+    const countMap = {};
+    activeCounts.forEach(c => {
+      countMap[c._id.toString()] = c.count;
+    });
+
+    const phonesWithCounts = phones.map(phone => {
+      const activeBookingsCount = countMap[phone._id.toString()] || 0;
+      // Auto-update status if count reaches limit (optional fallback)
+      let status = phone.status;
+      if (activeBookingsCount >= 5 && status !== 'Sold') {
+        status = 'Booked';
+      } else if (activeBookingsCount < 5 && status === 'Booked') {
+        status = 'Available';
+      }
+
+      return {
+        ...phone,
+        status,
+        activeBookingsCount
+      };
+    });
+
+    res.status(200).json({ success: true, count: phonesWithCounts.length, data: phonesWithCounts });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -40,13 +70,32 @@ exports.getPhones = async (req, res) => {
 // @access  Public
 exports.getPhone = async (req, res) => {
   try {
-    const phone = await Phone.findById(req.params.id);
+    const phone = await Phone.findById(req.params.id).lean();
 
     if (!phone) {
       return res.status(404).json({ success: false, message: 'Phone not found' });
     }
 
-    res.status(200).json({ success: true, data: phone });
+    const activeBookingsCount = await Booking.countDocuments({ 
+      phone: phone._id, 
+      status: { $in: ['Active', 'Completed'] } 
+    });
+
+    let status = phone.status;
+    if (activeBookingsCount >= 5 && status !== 'Sold') {
+      status = 'Booked';
+    } else if (activeBookingsCount < 5 && status === 'Booked') {
+      status = 'Available';
+    }
+
+    res.status(200).json({ 
+      success: true, 
+      data: {
+        ...phone,
+        status,
+        activeBookingsCount
+      } 
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

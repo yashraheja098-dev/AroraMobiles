@@ -58,10 +58,13 @@ const Phones = () => {
                 className="bg-background rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow group flex flex-col"
               >
                 <div className="aspect-w-4 aspect-h-3 bg-gray-50 flex items-center justify-center p-6 h-56 relative">
-                  <div className="absolute top-4 right-4 z-10">
+                  <div className="absolute top-4 right-4 z-10 flex flex-col items-end gap-2">
                     <span className={`px-3 py-1 rounded-full text-xs font-semibold 
                       ${phone.status === 'Available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                       {phone.status}
+                    </span>
+                    <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 shadow-sm border border-blue-200">
+                      {phone.activeBookingsCount || 0}/5 Bookings
                     </span>
                   </div>
                   {phone.images && phone.images.length > 0 ? (

@@ -26,18 +26,14 @@ exports.createBooking = async (req, res) => {
     }
 
     // Check booking limit
-    const limit = phone.bookingLimit || 1;
+    const limit = phone.bookingLimit || 5;
     const activePhoneBookingsCount = await Booking.countDocuments({ phone: phoneId, status: { $in: ['Active', 'Completed'] } });
     
     if (activePhoneBookingsCount >= limit) {
       return res.status(400).json({ success: false, message: 'This device has reached its maximum booking limit' });
     }
 
-    // Check if user already has an active booking
-    const activeBooking = await Booking.findOne({ user: req.user.id, status: 'Active' });
-    if (activeBooking) {
-      return res.status(400).json({ success: false, message: 'You already have an active booking' });
-    }
+    // Removed active booking restriction so users can book multiple phones
 
     // --- MOCK CHECKOUT MODE ---
     const keyId = process.env.RAZORPAY_KEY_ID || 'test_key_id';
@@ -122,7 +118,7 @@ exports.verifyPayment = async (req, res) => {
 
     // Update phone status if booking limit reached
     const phone = await Phone.findById(booking.phone);
-    const limit = phone.bookingLimit || 1;
+    const limit = phone.bookingLimit || 5;
     const activePhoneBookingsCount = await Booking.countDocuments({ phone: booking.phone, status: { $in: ['Active', 'Completed'] } });
     
     if (activePhoneBookingsCount >= limit) {

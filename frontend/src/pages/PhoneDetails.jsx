@@ -142,10 +142,15 @@ const PhoneDetails = () => {
           
           {/* Details Section */}
           <div className="md:w-1/2 p-10 flex flex-col justify-center">
-            <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold mb-4 w-fit
-                      ${phone.status === 'Available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-              {phone.status}
-            </span>
+            <div className="flex gap-3 mb-4">
+              <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold w-fit
+                        ${phone.status === 'Available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                {phone.status}
+              </span>
+              <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold w-fit bg-blue-100 text-blue-800 shadow-sm border border-blue-200">
+                {phone.activeBookingsCount || 0}/5 Bookings
+              </span>
+            </div>
             <h1 className="text-4xl font-extrabold text-primary tracking-tight mb-2">
               {phone.brand} {phone.modelName}
             </h1>
@@ -204,6 +209,14 @@ const PhoneDetails = () => {
                 A non-refundable booking fee of <strong>₹500</strong> is required to reserve this device.
                 The remaining amount must be paid at the store.
               </p>
+              <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded-r-lg">
+                <p className="text-sm text-blue-800 font-medium">
+                  Queue Position: <strong>{(phone.activeBookingsCount || 0) + 1}</strong>
+                </p>
+                <p className="text-xs text-blue-700 mt-1">
+                  If the people above you deny to buy, you will get a chance to buy it. If someone else buys, your booking amount will be refunded.
+                </p>
+              </div>
               
               <div className="flex space-x-4">
                 <button 
