@@ -62,7 +62,7 @@ exports.addPhone = async (req, res) => {
     // Process images if any
     if (req.files && req.files.length > 0) {
       phoneData.images = req.files.map(file => ({
-        url: `http://localhost:5000/uploads/${file.filename}`
+        url: `/uploads/${file.filename}`
       }));
     }
 

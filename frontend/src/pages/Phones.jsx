@@ -65,7 +65,15 @@ const Phones = () => {
                     </span>
                   </div>
                   {phone.images && phone.images.length > 0 ? (
-                    <img src={phone.images[0].url} alt={phone.brand} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" />
+                    <img 
+                      src={phone.images[0].url.startsWith('http://localhost:5000') 
+                            ? phone.images[0].url.replace('http://localhost:5000', import.meta.env.VITE_API_URL.replace('/api', ''))
+                            : phone.images[0].url.startsWith('/') 
+                              ? `${import.meta.env.VITE_API_URL.replace('/api', '')}${phone.images[0].url}` 
+                              : phone.images[0].url} 
+                      alt={phone.brand} 
+                      className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" 
+                    />
                   ) : (
                     <div className="w-full h-full bg-gray-200 rounded-lg flex items-center justify-center text-gray-400 group-hover:scale-105 transition-transform duration-300">
                       No Image
